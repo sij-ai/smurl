@@ -185,3 +185,13 @@ input[type="text"]:focus {
     background: var(--blue);
     color: var(--fg1);
 }
+
+.logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo-img {
+    max-width: 150px;  /* Adjust based on preference */
+    height: auto;
+}

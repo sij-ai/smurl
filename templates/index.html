@@ -8,7 +8,9 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="logo">Shorten my URL</h1>
+        <div class="logo">
+            <img src="{{ url_for('static', path='/images/fox.png') }}" alt="SMURL Logo" class="logo-img">
+        </div>
 
         <div class="url-box">
             <form method="post" action="/process">
