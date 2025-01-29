@@ -1,38 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>SMURL - Shorten My URL</title>
+
+    <!-- Dark-themed CSS -->
     <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/inter-ui/3.19.3/inter.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.2/Recharts.js"></script>
+
+    <!-- React & ReactDOM (UMD) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+
+    <!-- Recharts (depends on React) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.2/Recharts.min.js"></script>
 </head>
 <body>
     <div class="container">
+        <!-- Big SMURL heading -->
         <h1 class="logo">SMURL</h1>
+
         <div class="url-form">
             <form id="shortenForm" onsubmit="return handleSubmit(event)">
                 <div class="input-group">
-                    <input 
-                        type="url" 
-                        id="urlInput" 
+                    <!-- type="text" so that we don't get browser's built-in "invalid URL" block -->
+                    <input
+                        type="text"
+                        id="urlInput"
                         placeholder="Paste your URL here..."
                         required
                     >
-                    <button type="submit">Shorten</button>
+                    <!-- The button now says SMURL -->
+                    <button type="submit">SMURL</button>
                 </div>
             </form>
 
-            <!-- Result for new shortened URL -->
+            <!-- Shortened URL display -->
             <div id="shortResult" class="result">
-                <p>Your shortened URL:</p>
-                <a id="shortUrl" href="#" target="_blank"></a>
+                <!-- No "Your shortened URL:" text. Just a big bold link. -->
+                <div class="short-url">
+                    <a id="shortUrl" href="#" target="_blank"></a>
+                </div>
+                <!-- COPY button on its own line, minimal spacing below -->
+                <button class="copy-btn" onclick="copyShortUrl()">COPY</button>
             </div>
 
             <!-- Analytics view -->
             <div id="analyticsResult" class="result">
-                <h2>Analytics for Original URL:</h2>
+                <h2 class="analytics-title">Analytics for Original URL</h2>
                 <a id="originalUrl" href="#" target="_blank" class="original-url"></a>
                 
                 <div class="time-range">
@@ -48,87 +63,132 @@
     </div>
 
     <script>
-        const { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } = Recharts;
-        let currentStats = null;
+    // Recharts objects
+    const {
+      LineChart,
+      Line,
+      XAxis,
+      YAxis,
+      Tooltip,
+      ResponsiveContainer
+    } = Recharts;
 
-        async function handleSubmit(event) {
-            event.preventDefault();
-            const url = document.getElementById('urlInput').value;
-            
-            try {
-                const response = await fetch('/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: url })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    if (data.is_analytics) {
-                        showAnalytics(data);
-                    } else {
-                        showShortUrl(data.short_code);
-                    }
-                } else {
-                    alert(data.error || 'An error occurred');
-                }
-            } catch (error) {
-                alert('An error occurred');
-            }
+    let currentStats = null;
+
+    async function handleSubmit(event) {
+      event.preventDefault();
+      let url = document.getElementById('urlInput').value.trim();
+
+      // Auto-prepend https:// if user didn't type http:// or https://
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
+      }
+
+      console.log('Submitting to /create:', url);
+      try {
+        const response = await fetch('/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await response.json();
+        console.log('Response from /create:', data);
+
+        if (response.ok) {
+          if (data.is_analytics) {
+            // We have an analytics response
+            showAnalytics(data);
+          } else {
+            // We have a new short code
+            showShortUrl(data.short_code);
+          }
+        } else {
+          alert(data.error || 'An error occurred');
         }
+      } catch (err) {
+        console.error('Error in handleSubmit:', err);
+        alert('An error occurred');
+      }
+    }
 
-        function showShortUrl(shortCode) {
-            const shortUrl = `${window.location.origin}/${shortCode}`;
-            document.getElementById('shortUrl').href = shortUrl;
-            document.getElementById('shortUrl').textContent = shortUrl;
-            document.getElementById('shortResult').classList.add('visible');
-            document.getElementById('analyticsResult').classList.remove('visible');
-        }
+    function showShortUrl(shortCode) {
+      const shortUrlElement = document.getElementById('shortUrl');
+      const shortUrl = `${window.location.origin}/${shortCode}`;
+      shortUrlElement.href = shortUrl;
+      shortUrlElement.textContent = shortUrl;
 
-        function showAnalytics(data) {
-            currentStats = data.stats;
-            document.getElementById('originalUrl').href = data.original_url;
-            document.getElementById('originalUrl').textContent = data.original_url;
-            document.getElementById('analyticsResult').classList.add('visible');
-            document.getElementById('shortResult').classList.remove('visible');
-            
-            // Show initial chart with 24h data
-            updateChart('day');
+      // Show shortResult
+      document.getElementById('shortResult').classList.add('visible');
+      // Hide analyticsResult
+      document.getElementById('analyticsResult').classList.remove('visible');
+    }
 
-            // Set up time range buttons
-            document.querySelectorAll('.time-range button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    document.querySelectorAll('.time-range button').forEach(b => 
-                        b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    updateChart(e.target.dataset.range);
-                });
-            });
-        }
+    function showAnalytics(data) {
+      currentStats = data.stats;
+      document.getElementById('originalUrl').href = data.original_url;
+      document.getElementById('originalUrl').textContent = data.original_url;
 
-        function updateChart(timeRange) {
-            const data = currentStats[timeRange];
-            const chartContainer = document.getElementById('chart');
-            
-            ReactDOM.render(
-                React.createElement(ResponsiveContainer, { width: '100%', height: 300 },
-                    React.createElement(LineChart, { data: data },
-                        React.createElement(XAxis, { dataKey: 'period' }),
-                        React.createElement(YAxis),
-                        React.createElement(Tooltip),
-                        React.createElement(Line, {
-                            type: 'monotone',
-                            dataKey: 'clicks',
-                            stroke: '#83a598',
-                            strokeWidth: 2,
-                            dot: false
-                        })
-                    )
-                ),
-                chartContainer
-            );
-        }
+      // Hide shortResult
+      document.getElementById('shortResult').classList.remove('visible');
+      // Show analyticsResult
+      document.getElementById('analyticsResult').classList.add('visible');
+
+      // Show initial chart with 24h data
+      updateChart('day');
+
+      // Set up time range buttons if not already set up
+      document.querySelectorAll('.time-range button').forEach((button) => {
+        button.addEventListener('click', (e) => {
+          document.querySelectorAll('.time-range button').forEach((b) =>
+            b.classList.remove('active')
+          );
+          e.target.classList.add('active');
+          updateChart(e.target.dataset.range);
+        });
+      });
+    }
+
+    function updateChart(timeRange) {
+      // Safeguard if we have no stats
+      const statsData = currentStats?.[timeRange] || [];
+      console.log('updateChart:', timeRange, statsData);
+
+      const chartContainer = document.getElementById('chart');
+
+      // If there's no data or empty array, you can skip rendering or show a small message
+      // But let's attempt to render an empty chart anyway
+      ReactDOM.render(
+        React.createElement(
+          ResponsiveContainer,
+          { width: '100%', height: 300 },
+          React.createElement(
+            LineChart,
+            { data: statsData },
+            React.createElement(XAxis, { dataKey: 'period' }),
+            React.createElement(YAxis),
+            React.createElement(Tooltip),
+            React.createElement(Line, {
+              type: 'monotone',
+              dataKey: 'clicks',
+              stroke: '#83a598',
+              strokeWidth: 2,
+              dot: false
+            })
+          )
+        ),
+        chartContainer
+      );
+    }
+
+    function copyShortUrl() {
+      const shortUrlElement = document.getElementById('shortUrl');
+      if (!shortUrlElement || !shortUrlElement.textContent) return;
+
+      navigator.clipboard.writeText(shortUrlElement.textContent)
+        .then(() => alert('Shortened URL copied!'))
+        .catch(() => alert('Failed to copy.'));
+    }
     </script>
 </body>
 </html>
