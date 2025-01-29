@@ -1,79 +1,24 @@
-/* Gruvbox Dark theme colors */
-:root {
-    --bg: #282828;
-    --bg1: #3c3836;
-    --bg2: #504945;
-    --fg: #ebdbb2;
-    --fg1: #fbf1c7;
-    --blue: #458588;
-    --blue-bright: #83a598;
-    --green: #98971a;
-    --aqua: #689d6a;
-}
-
-body {
-    background-color: var(--bg);
-    color: var(--fg);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    min-height: 100vh;
-    margin: 0;
-    display: grid;
-    place-items: center;
-}
-
-.container {
-    width: 90%;
-    max-width: 700px;
-    padding: 2rem;
-}
-
-/* Big SMURL heading with gradient text */
-.logo {
-    font-size: 4rem;
-    font-weight: 900;
-    text-align: center;
-    margin-bottom: 2rem;
-    background: linear-gradient(135deg, var(--blue-bright), var(--aqua));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.05em;
-}
-
-.url-form {
+.url-box {
     background: var(--bg1);
     padding: 2rem;
     border-radius: 1rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease;
+    max-width: 600px;
+    margin: auto;
 }
 
-/* Input group and button row */
-.input-group {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+.short-url a {
+    font-size: 4rem;
+    font-weight: 900;
+    text-decoration: none;
+    text-align: center;
+    display: block;
+    color: var(--blue-bright);
 }
 
-/* The text input box: dark background, no ugly white fill */
-input[type="text"] {
-    flex: 1;
-    background: var(--bg2);
-    border: 2px solid transparent;
-    color: var(--fg);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    font-size: 1.1rem;
-    transition: all 0.2s ease;
-}
-
-input[type="text"]:focus {
-    outline: none;
-    border-color: var(--blue);
-}
-
-/* The SMURL button */
-button {
-    background: var(--blue);
+.copy-btn {
+    background: var(--blue-bright);
     color: var(--fg1);
     border: none;
     padding: 1rem 2rem;
@@ -82,115 +27,19 @@ button {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-button:hover {
-    background: var(--blue-bright);
-    transform: translateY(-1px);
-}
-
-/* Hide results by default */
-.result {
-    display: none;
-    margin-top: 1.5rem;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s ease;
-    margin-bottom: 0; /* minimize bottom space */
-}
-
-/* Show the results container when .visible is added */
-.result.visible {
     display: block;
-    opacity: 1;
-    transform: translateY(0);
+    margin: 0.5rem auto;
 }
 
-/* The big, bold shortened URL link */
-.short-url {
-    text-align: center;
-    margin: 1rem 0;
-}
-
-/* Make the link bigger and bolder */
-.short-url a {
-    color: var(--blue-bright);
-    font-size: 2rem;  /* bigger text */
-    font-weight: 800; /* bold */
-    text-decoration: none;
-    display: inline-block; /* keep it on its own line, centered */
-}
-
-/* The COPY button below the link */
-.copy-btn {
-    display: block;
-    margin: 0.5rem auto 0; /* some spacing above, minimal below */
-    background: var(--blue);
-    color: var(--fg1);
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-/* Hover for COPY button */
-.copy-btn:hover {
-    background: var(--blue-bright);
-    transform: translateY(-1px);
-}
-
-/* Analytics section */
 .analytics-title {
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 2rem;
     margin-bottom: 1rem;
 }
 
-.original-url {
-    display: block;
-    margin: 1rem auto;
-    padding: 1rem;
-    background: var(--bg2);
-    border-radius: 0.5rem;
-    width: fit-content;
+.analytics-count {
     text-align: center;
-    color: var(--blue-bright);
-    text-decoration: none;
-    font-weight: 700;
-}
-
-/* Time-range buttons (24h, Week, etc.) */
-.time-range {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin: 1.5rem 0;
-}
-
-.time-range button {
-    background: var(--bg2);
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    color: var(--fg);
-    border: 1px solid var(--blue);
-    border-radius: 0.3rem;
-    transition: background 0.2s;
-    cursor: pointer;
-}
-
-.time-range button.active {
-    background: var(--blue);
-    color: var(--fg1);
-}
-
-/* The chart container: keep it dark-themed. */
-.chart {
-    background: var(--bg2);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    height: 300px; /* Recharts uses a 300px container (from the JS) */
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
 }

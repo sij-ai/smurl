@@ -1,194 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SMURL - Shorten My URL</title>
-
-    <!-- Dark-themed CSS -->
     <link rel="stylesheet" href="{{ url_for('static', path='/css/styles.css') }}">
-
-    <!-- React & ReactDOM (UMD) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
-
-    <!-- Recharts (depends on React) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.2/Recharts.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <!-- Big SMURL heading -->
         <h1 class="logo">SMURL</h1>
 
-        <div class="url-form">
-            <form id="shortenForm" onsubmit="return handleSubmit(event)">
+        <div class="url-box">
+            <form method="post" action="/process">
                 <div class="input-group">
-                    <!-- type="text" so that we don't get browser's built-in "invalid URL" block -->
-                    <input
-                        type="text"
-                        id="urlInput"
-                        placeholder="Paste your URL here..."
-                        required
-                    >
-                    <!-- The button now says SMURL -->
-                    <button type="submit">SMURL</button>
+                    <input type="text" name="user_input" placeholder="Enter a URL or shortcode..." required>
+                    <button type="submit" class="copy-btn">SMURL</button>
                 </div>
             </form>
 
-            <!-- Shortened URL display -->
-            <div id="shortResult" class="result">
-                <!-- No "Your shortened URL:" text. Just a big bold link. -->
+            {% if short_url %}
+            <div class="result visible">
                 <div class="short-url">
-                    <a id="shortUrl" href="#" target="_blank"></a>
+                    <a href="{{ short_url }}" target="_blank">{{ short_url }}</a>
                 </div>
-                <!-- COPY button on its own line, minimal spacing below -->
-                <button class="copy-btn" onclick="copyShortUrl()">COPY</button>
+                <button class="copy-btn" onclick="copyShortUrl(this)">COPY</button>
             </div>
+            {% endif %}
 
-            <!-- Analytics view -->
-            <div id="analyticsResult" class="result">
+            {% if analytics_mode %}
+            <div class="result visible">
                 <h2 class="analytics-title">Analytics for Original URL</h2>
-                <a id="originalUrl" href="#" target="_blank" class="original-url"></a>
-                
-                <div class="time-range">
-                    <button data-range="day" class="active">24h</button>
-                    <button data-range="week">Week</button>
-                    <button data-range="year">Year</button>
-                    <button data-range="all">All</button>
-                </div>
-                
-                <div id="chart" class="chart"></div>
+                <a href="{{ original_url }}" target="_blank" class="original-url">{{ original_url }}</a>
+                <p class="analytics-count">Total Clicks: {{ click_count }}</p>
             </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="result visible error">
+                <p>{{ error }}</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 
     <script>
-    // Recharts objects
-    const {
-      LineChart,
-      Line,
-      XAxis,
-      YAxis,
-      Tooltip,
-      ResponsiveContainer
-    } = Recharts;
+        function copyShortUrl(button) {
+            const shortUrlElement = document.querySelector('.short-url a');
+            if (!shortUrlElement) return;
 
-    let currentStats = null;
-
-    async function handleSubmit(event) {
-      event.preventDefault();
-      let url = document.getElementById('urlInput').value.trim();
-
-      // Auto-prepend https:// if user didn't type http:// or https://
-      if (!/^https?:\/\//i.test(url)) {
-        url = 'https://' + url;
-      }
-
-      console.log('Submitting to /create:', url);
-      try {
-        const response = await fetch('/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url })
-        });
-
-        const data = await response.json();
-        console.log('Response from /create:', data);
-
-        if (response.ok) {
-          if (data.is_analytics) {
-            // We have an analytics response
-            showAnalytics(data);
-          } else {
-            // We have a new short code
-            showShortUrl(data.short_code);
-          }
-        } else {
-          alert(data.error || 'An error occurred');
+            navigator.clipboard.writeText(shortUrlElement.textContent)
+                .then(() => {
+                    button.style.background = '#689d6a';
+                    setTimeout(() => button.style.background = '', 2000);
+                })
+                .catch(() => alert('Failed to copy.'));
         }
-      } catch (err) {
-        console.error('Error in handleSubmit:', err);
-        alert('An error occurred');
-      }
-    }
-
-    function showShortUrl(shortCode) {
-      const shortUrlElement = document.getElementById('shortUrl');
-      const shortUrl = `${window.location.origin}/${shortCode}`;
-      shortUrlElement.href = shortUrl;
-      shortUrlElement.textContent = shortUrl;
-
-      // Show shortResult
-      document.getElementById('shortResult').classList.add('visible');
-      // Hide analyticsResult
-      document.getElementById('analyticsResult').classList.remove('visible');
-    }
-
-    function showAnalytics(data) {
-      currentStats = data.stats;
-      document.getElementById('originalUrl').href = data.original_url;
-      document.getElementById('originalUrl').textContent = data.original_url;
-
-      // Hide shortResult
-      document.getElementById('shortResult').classList.remove('visible');
-      // Show analyticsResult
-      document.getElementById('analyticsResult').classList.add('visible');
-
-      // Show initial chart with 24h data
-      updateChart('day');
-
-      // Set up time range buttons if not already set up
-      document.querySelectorAll('.time-range button').forEach((button) => {
-        button.addEventListener('click', (e) => {
-          document.querySelectorAll('.time-range button').forEach((b) =>
-            b.classList.remove('active')
-          );
-          e.target.classList.add('active');
-          updateChart(e.target.dataset.range);
-        });
-      });
-    }
-
-    function updateChart(timeRange) {
-      // Safeguard if we have no stats
-      const statsData = currentStats?.[timeRange] || [];
-      console.log('updateChart:', timeRange, statsData);
-
-      const chartContainer = document.getElementById('chart');
-
-      // If there's no data or empty array, you can skip rendering or show a small message
-      // But let's attempt to render an empty chart anyway
-      ReactDOM.render(
-        React.createElement(
-          ResponsiveContainer,
-          { width: '100%', height: 300 },
-          React.createElement(
-            LineChart,
-            { data: statsData },
-            React.createElement(XAxis, { dataKey: 'period' }),
-            React.createElement(YAxis),
-            React.createElement(Tooltip),
-            React.createElement(Line, {
-              type: 'monotone',
-              dataKey: 'clicks',
-              stroke: '#83a598',
-              strokeWidth: 2,
-              dot: false
-            })
-          )
-        ),
-        chartContainer
-      );
-    }
-
-    function copyShortUrl() {
-      const shortUrlElement = document.getElementById('shortUrl');
-      if (!shortUrlElement || !shortUrlElement.textContent) return;
-
-      navigator.clipboard.writeText(shortUrlElement.textContent)
-        .then(() => alert('Shortened URL copied!'))
-        .catch(() => alert('Failed to copy.'));
-    }
     </script>
 </body>
 </html>
