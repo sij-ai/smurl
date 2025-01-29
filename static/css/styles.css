@@ -123,7 +123,7 @@ input[type="text"]:focus {
 /* Make the link huge and bold */
 .short-url a {
     color: var(--blue-bright);
-    font-size: 4rem;  /* as big as the SMURL logo */
+    font-size: 3rem;  /* as big as the SMURL logo */
     font-weight: 900; /* extra bold */
     text-decoration: none;
     display: inline-block; /* keep it on its own line */
