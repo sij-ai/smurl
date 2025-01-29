@@ -11,6 +11,9 @@ import urllib.parse
 from typing import List
 
 app = FastAPI(title="SMURL")
+host = "0.0.0.0"
+port = "7997"
+
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -136,4 +139,4 @@ async def redirect_to_url(short_code: str):
 if __name__ == "__main__":
     init_db()
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=host, port=port)
