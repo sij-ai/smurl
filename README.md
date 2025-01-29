@@ -1,3 +1,6 @@
+<img src="https://sij.ai/sij/smurl/raw/branch/main/static/images/fox.png" width="320" alt="smurl fox">
+
+
 # Shorten My URL (SMURL)
 
 SMURL is a lightweight, self-hosted URL shortener built with FastAPI and SQLite. It provides a simple, dark-themed interface for shortening URLs and viewing analytics. 
