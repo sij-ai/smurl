@@ -12,7 +12,7 @@ from typing import List
 
 app = FastAPI(title="SMURL")
 host = "0.0.0.0"
-port = "7997"
+port = 7997
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
