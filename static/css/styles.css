@@ -1,3 +1,48 @@
+/* Gruvbox Dark theme colors */
+:root {
+    --bg: #282828;
+    --bg1: #3c3836;
+    --bg2: #504945;
+    --fg: #ebdbb2;
+    --fg1: #fbf1c7;
+    --blue: #458588;
+    --blue-bright: #83a598;
+    --green: #98971a;
+    --aqua: #689d6a;
+}
+
+/* Global Page Styling */
+body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container holding everything */
+.container {
+    width: 90%;
+    max-width: 600px;
+    padding: 2rem;
+}
+
+/* Big SMURL heading with gradient text */
+.logo {
+    font-size: 4rem;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--blue-bright), var(--aqua));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.05em;
+}
+
+/* Box surrounding the input and output */
 .url-box {
     background: var(--bg1);
     padding: 2rem;
@@ -8,22 +53,38 @@
     margin: auto;
 }
 
-.short-url a {
-    font-size: 4rem;
-    font-weight: 900;
-    text-decoration: none;
-    text-align: center;
-    display: block;
-    color: var(--blue-bright);
+/* Input & button row */
+.input-group {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
+/* The text input box: dark background, no ugly white fill */
+input[type="text"] {
+    flex: 1;
+    background: var(--bg2);
+    border: 2px solid transparent;
+    color: var(--fg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-size: 1.2rem;
+    transition: all 0.2s ease;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--blue);
+}
+
+/* The SMURL and COPY buttons */
 .copy-btn {
     background: var(--blue-bright);
     color: var(--fg1);
     border: none;
     padding: 1rem 2rem;
     border-radius: 0.5rem;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -31,15 +92,96 @@
     margin: 0.5rem auto;
 }
 
+.copy-btn:hover {
+    background: var(--blue);
+    transform: translateY(-1px);
+}
+
+/* Hide results by default */
+.result {
+    display: none;
+    margin-top: 1.5rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    margin-bottom: 0; /* minimize bottom space */
+}
+
+/* Show the results container when .visible is added */
+.result.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* The big, bold shortened URL link */
+.short-url {
+    text-align: center;
+    margin: 1rem 0;
+}
+
+/* Make the link huge and bold */
+.short-url a {
+    color: var(--blue-bright);
+    font-size: 4rem;  /* as big as the SMURL logo */
+    font-weight: 900; /* extra bold */
+    text-decoration: none;
+    display: inline-block; /* keep it on its own line */
+}
+
+/* The COPY button below the link */
+.copy-btn:active {
+    background: var(--green);
+}
+
+/* Analytics section */
 .analytics-title {
     text-align: center;
     font-size: 2rem;
     margin-bottom: 1rem;
 }
 
+.original-url {
+    display: block;
+    margin: 1rem auto;
+    padding: 1rem;
+    background: var(--bg2);
+    border-radius: 0.5rem;
+    width: fit-content;
+    text-align: center;
+    color: var(--blue-bright);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+/* Click count */
 .analytics-count {
     text-align: center;
     font-size: 1.5rem;
     font-weight: bold;
     margin-top: 0.5rem;
+}
+
+/* Time-range buttons (24h, Week, etc.) */
+.time-range {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.time-range button {
+    background: var(--bg2);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: var(--fg);
+    border: 1px solid var(--blue);
+    border-radius: 0.3rem;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.time-range button.active {
+    background: var(--blue);
+    color: var(--fg1);
 }
